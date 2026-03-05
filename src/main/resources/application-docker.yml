@@ -5,7 +5,7 @@ spring:
     gateway:
       routes:
         - id: authservice
-          uri: ${services.authservice-url:http://authservice:8082}
+          uri: ${services.authservice-url}
           predicates:
             - Path=/api/v1/auth/**
           filters:
@@ -14,7 +14,7 @@ spring:
                 name: authservice
                 fallbackUri: forward:/fallback
         - id: userservice
-          uri: ${services.userservice-url:http://userservice:8080}
+          uri: ${services.userservice-url}
           predicates:
             - Path=/api/users/**,/api/cards/**
           filters:
@@ -23,7 +23,7 @@ spring:
                 name: userservice
                 fallbackUri: forward:/fallback
         - id: orderservice
-          uri: ${services.orderservice-url:http://orderservice:8080}
+          uri: ${services.orderservice-url}
           predicates:
             - Path=/api/v1/orders/**,/api/v1/items/**
           filters:
@@ -33,12 +33,12 @@ spring:
                 fallbackUri: forward:/fallback
 
 services:
-  authservice-url: ${AUTHSERVICE_BASE_URL:http://authservice:8082}
-  userservice-url: ${USERSERVICE_BASE_URL:http://userservice:8080}
-  orderservice-url: ${ORDERSERVICE_BASE_URL:http://orderservice:8080}
+  authservice-url: http://authservice:8082
+  userservice-url: http://userservice:8080
+  orderservice-url: http://orderservice:8080
 
 jwt:
   secret: ${JWT_SECRET:}
 
 server:
-  port: ${SERVER_PORT:8085}
+  port: 8085
