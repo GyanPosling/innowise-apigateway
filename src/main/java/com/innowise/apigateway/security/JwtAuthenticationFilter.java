@@ -6,6 +6,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -22,16 +23,20 @@ import reactor.core.publisher.Mono;
 public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
   private static final String BEARER_PREFIX = "Bearer ";
-  private static final String LOGIN_PATH = "/api/v1/auth/login";
-  private static final String REGISTER_PATH = "/api/v1/auth/register";
 
   @Value("${jwt.secret:}")
   private String secret;
 
+  @Value("${security.auth.login-path:/api/v1/auth/login}")
+  private String loginPath;
+
+  @Value("${security.auth.register-path:/api/v1/auth/register}")
+  private String registerPath;
+
   @Override
   public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
     String path = exchange.getRequest().getPath().value();
-    if (LOGIN_PATH.equals(path) || REGISTER_PATH.equals(path)) {
+    if (loginPath.equals(path) || registerPath.equals(path)) {
       return chain.filter(exchange);
     }
 
@@ -41,10 +46,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     }
 
     String token = authHeader.substring(BEARER_PREFIX.length());
-    Claims claims = parseClaims(token);
-    if (claims == null) {
-      throw new JwtException("Unauthorized");
-    }
+    Claims claims = parseClaims(token).orElseThrow(() -> new JwtException("Unauthorized"));
 
     ServerHttpRequest.Builder requestBuilder = exchange.getRequest().mutate();
     applyHeader(requestBuilder, "X-USER-ID", claims.get("userId"));
@@ -61,19 +63,21 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     return -1;
   }
 
-  private Claims parseClaims(String token) {
+  private Optional<Claims> parseClaims(String token) {
     if (secret == null || secret.isBlank()) {
       throw new ApigatewaySecurityException();
     }
 
     try {
-      return Jwts.parserBuilder()
-          .setSigningKey(Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8)))
-          .build()
-          .parseClaimsJws(token)
-          .getBody();
+      return Optional.of(
+          Jwts.parserBuilder()
+              .setSigningKey(Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8)))
+              .build()
+              .parseClaimsJws(token)
+              .getBody()
+      );
     } catch (JwtException | IllegalArgumentException ex) {
-      return null;
+      return Optional.empty();
     }
   }
 
