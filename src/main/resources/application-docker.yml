@@ -38,7 +38,10 @@ services:
   orderservice-url: http://orderservice:8080
 
 jwt:
-  secret: ${JWT_SECRET:}
+  secret: ${JWT_SECRET}
+
+gateway:
+  internal-signing-secret: ${GATEWAY_INTERNAL_SIGNING_SECRET}
 
 cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
