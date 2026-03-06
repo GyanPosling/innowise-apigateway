@@ -70,9 +70,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     }
 
     String ts = String.valueOf(Instant.now().getEpochSecond());
-    String method = exchange.getRequest().getMethod() != null
-        ? exchange.getRequest().getMethod().name()
-        : "";
+    String method = exchange.getRequest().getMethodValue();
     String signature = sign(buildPayload(claims, method, requestPath, ts));
     ServerHttpRequest.Builder requestBuilder = exchange.getRequest().mutate();
     applyHeader(requestBuilder, USER_ID_HEADER, claims.get("userId"));
