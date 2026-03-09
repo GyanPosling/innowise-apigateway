@@ -13,27 +13,27 @@ import reactor.core.publisher.Mono;
 @RestController
 public class FallbackController implements FallbackControllerApi {
 
-  @RequestMapping(
-      path = "/fallback",
-      method = {
-          RequestMethod.GET,
-          RequestMethod.POST,
-          RequestMethod.PUT,
-          RequestMethod.PATCH,
-          RequestMethod.DELETE,
-          RequestMethod.OPTIONS,
-          RequestMethod.HEAD
-      }
-  )
-  @Override
-  public Mono<ResponseEntity<ErrorResponse>> fallback() {
-    ErrorResponse response = ErrorResponse.builder()
-        .timestamp(LocalDateTime.now())
-        .status(HttpStatus.SERVICE_UNAVAILABLE.value())
-        .error(HttpStatus.SERVICE_UNAVAILABLE.getReasonPhrase())
-        .message("Service is unavailable")
-        .path("/fallback")
-        .build();
-    return Mono.just(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response));
-  }
+    @RequestMapping(
+            path = "/fallback",
+            method = {
+                    RequestMethod.GET,
+                    RequestMethod.POST,
+                    RequestMethod.PUT,
+                    RequestMethod.PATCH,
+                    RequestMethod.DELETE,
+                    RequestMethod.OPTIONS,
+                    RequestMethod.HEAD
+            }
+    )
+    @Override
+    public Mono<ResponseEntity<ErrorResponse>> fallback() {
+        ErrorResponse response = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.SERVICE_UNAVAILABLE.value())
+                .error(HttpStatus.SERVICE_UNAVAILABLE.getReasonPhrase())
+                .message("Service is unavailable")
+                .path("/fallback")
+                .build();
+        return Mono.just(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response));
+    }
 }

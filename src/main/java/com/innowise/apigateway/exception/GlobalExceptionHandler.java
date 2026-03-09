@@ -23,59 +23,59 @@ import reactor.core.publisher.Mono;
 @Order(-2)
 public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
 
-  private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
-  public GlobalExceptionHandler() {
-    this.objectMapper = new ObjectMapper();
-    this.objectMapper.registerModule(new JavaTimeModule());
-    this.objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-  }
-
-  @Override
-  @NonNull
-  public Mono<Void> handle(@NonNull ServerWebExchange exchange, @NonNull Throwable ex) {
-    ServerHttpResponse response = exchange.getResponse();
-    if (response.isCommitted()) {
-      return Mono.error(ex);
+    public GlobalExceptionHandler() {
+        this.objectMapper = new ObjectMapper();
+        this.objectMapper.registerModule(new JavaTimeModule());
+        this.objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
-    HttpStatus status = resolveStatus(ex);
-    return buildResponse(exchange, response, status, ex.getMessage());
-  }
+    @Override
+    @NonNull
+    public Mono<Void> handle(@NonNull ServerWebExchange exchange, @NonNull Throwable ex) {
+        ServerHttpResponse response = exchange.getResponse();
+        if (response.isCommitted()) {
+            return Mono.error(ex);
+        }
 
-  private HttpStatus resolveStatus(Throwable ex) {
-    if (ex instanceof JwtException || ex instanceof ApigatewaySecurityException) {
-      return HttpStatus.UNAUTHORIZED;
+        HttpStatus status = resolveStatus(ex);
+        return buildResponse(exchange, response, status, ex.getMessage());
     }
-    if (ex instanceof ResponseStatusException responseStatusException) {
-      return HttpStatus.valueOf(responseStatusException.getStatusCode().value());
+
+    private HttpStatus resolveStatus(Throwable ex) {
+        if (ex instanceof JwtException || ex instanceof ApigatewaySecurityException) {
+            return HttpStatus.UNAUTHORIZED;
+        }
+        if (ex instanceof ResponseStatusException responseStatusException) {
+            return HttpStatus.valueOf(responseStatusException.getStatusCode().value());
+        }
+        return HttpStatus.INTERNAL_SERVER_ERROR;
     }
-    return HttpStatus.INTERNAL_SERVER_ERROR;
-  }
 
-  private Mono<Void> buildResponse(ServerWebExchange exchange, ServerHttpResponse response,
-      HttpStatus status, String message) {
-    response.setStatusCode(status);
-    response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+    private Mono<Void> buildResponse(ServerWebExchange exchange, ServerHttpResponse response,
+            HttpStatus status, String message) {
+        response.setStatusCode(status);
+        response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
-    ErrorResponse errorResponse = ErrorResponse.builder()
-        .timestamp(LocalDateTime.now())
-        .status(status.value())
-        .error(status.getReasonPhrase())
-        .message(message)
-        .path(exchange.getRequest().getURI().getPath())
-        .build();
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(status.value())
+                .error(status.getReasonPhrase())
+                .message(message)
+                .path(exchange.getRequest().getURI().getPath())
+                .build();
 
-    try {
-      byte[] bytes = objectMapper.writeValueAsBytes(errorResponse);
-      DataBuffer buffer = response.bufferFactory().wrap(bytes);
-      return response.writeWith(Mono.just(buffer));
-    } catch (JsonProcessingException e) {
-      String rawError = String.format("{\"error\":\"%s\",\"message\":\"%s\"}",
-          status.getReasonPhrase(), message);
-      DataBuffer buffer = response.bufferFactory()
-          .wrap(rawError.getBytes(StandardCharsets.UTF_8));
-      return response.writeWith(Mono.just(buffer));
+        try {
+            byte[] bytes = objectMapper.writeValueAsBytes(errorResponse);
+            DataBuffer buffer = response.bufferFactory().wrap(bytes);
+            return response.writeWith(Mono.just(buffer));
+        } catch (JsonProcessingException e) {
+            String rawError = String.format("{\"error\":\"%s\",\"message\":\"%s\"}",
+                    status.getReasonPhrase(), message);
+            DataBuffer buffer = response.bufferFactory()
+                    .wrap(rawError.getBytes(StandardCharsets.UTF_8));
+            return response.writeWith(Mono.just(buffer));
+        }
     }
-  }
 }

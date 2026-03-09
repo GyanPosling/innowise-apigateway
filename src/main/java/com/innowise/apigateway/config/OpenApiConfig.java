@@ -11,19 +11,19 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class OpenApiConfig {
 
-  @Bean
-  public OpenAPI apiGatewayOpenAPI() {
-    String schemeName = "bearerAuth";
-    return new OpenAPI()
-        .info(new Info()
-            .title("API Gateway")
-            .version("1.0"))
-        .addSecurityItem(new SecurityRequirement().addList(schemeName))
-        .components(new Components()
-            .addSecuritySchemes(schemeName, new SecurityScheme()
-                .name(schemeName)
-                .type(SecurityScheme.Type.HTTP)
-                .scheme("bearer")
-                .bearerFormat("JWT")));
-  }
+    @Bean
+    public OpenAPI apiGatewayOpenAPI() {
+        String schemeName = "bearerAuth";
+        return new OpenAPI()
+                .info(new Info()
+                        .title("API Gateway")
+                        .version("1.0"))
+                .addSecurityItem(new SecurityRequirement().addList(schemeName))
+                .components(new Components()
+                        .addSecuritySchemes(schemeName, new SecurityScheme()
+                                .name(schemeName)
+                                .type(SecurityScheme.Type.HTTP)
+                                .scheme("bearer")
+                                .bearerFormat("JWT")));
+    }
 }

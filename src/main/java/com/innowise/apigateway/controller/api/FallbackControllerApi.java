@@ -8,5 +8,5 @@ import reactor.core.publisher.Mono;
 @Hidden
 public interface FallbackControllerApi {
 
-  Mono<ResponseEntity<ErrorResponse>> fallback();
+    Mono<ResponseEntity<ErrorResponse>> fallback();
 }
