@@ -9,12 +9,12 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.util.List;
 import java.util.Base64;
 import java.util.Objects;
 import java.util.Optional;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
@@ -26,7 +26,6 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 @Component
-@RequiredArgsConstructor
 public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
   private static final String BEARER_PREFIX = "Bearer ";
@@ -50,10 +49,16 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
   @Value("${security.auth.register-path:/api/v1/auth/register}")
   private String registerPath;
 
+  private static final List<String> PUBLIC_PATH_PREFIXES = List.of(
+      "/swagger-ui",
+      "/v3/api-docs",
+      "/actuator/health"
+  );
+
   @Override
   public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
     String requestPath = exchange.getRequest().getPath().value();
-    if (loginPath.equals(requestPath) || registerPath.equals(requestPath)) {
+    if (shouldSkipAuth(requestPath)) {
       return chain.filter(exchange);
     }
 
@@ -87,6 +92,13 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
   @Override
   public int getOrder() {
     return -1;
+  }
+
+  private boolean shouldSkipAuth(String requestPath) {
+    if (loginPath.equals(requestPath) || registerPath.equals(requestPath)) {
+      return true;
+    }
+    return PUBLIC_PATH_PREFIXES.stream().anyMatch(requestPath::startsWith);
   }
 
   private Optional<Claims> parseClaims(String token) {
