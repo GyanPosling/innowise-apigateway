@@ -13,7 +13,6 @@ import reactor.core.publisher.Mono;
 @RestController
 public class FallbackController implements FallbackControllerApi {
 
-  // CircuitBreaker forwards the original method, but this handler is read-only and only returns an error payload.
   @RequestMapping(
       path = "/fallback",
       method = {

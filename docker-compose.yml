@@ -30,8 +30,6 @@ services:
       LOGGING_LEVEL_LIQUIBASE: INFO
       LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_BOOT_AUTOCONFIGURE_LIQUIBASE: DEBUG
       USERSERVICE_BASE_URL: http://userservice:8080
-    ports:
-      - "8082:8082"
     depends_on:
       authservice-postgres:
         condition: service_healthy
@@ -72,8 +70,6 @@ services:
       REDIS_PORT: ${REDIS_PORT}
       SERVICES_INTERNAL_SECRET: ${SERVICES_INTERNAL_SECRET}
       GATEWAY_INTERNAL_SIGNING_SECRET: ${GATEWAY_INTERNAL_SIGNING_SECRET}
-    ports:
-      - "8081:8080"
     depends_on:
       userservice-postgres:
         condition: service_healthy
@@ -128,8 +124,6 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       USERSERVICE_BASE_URL: http://userservice:8080
       AUTHSERVICE_BASE_URL: http://authservice:8082
-    ports:
-      - "8080:8080"
     depends_on:
       orderservice-postgres:
         condition: service_healthy

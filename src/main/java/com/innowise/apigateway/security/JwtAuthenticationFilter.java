@@ -49,6 +49,9 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
   @Value("${security.auth.register-path:/api/v1/auth/register}")
   private String registerPath;
 
+  @Value("${security.auth.refresh-path:/api/v1/auth/refresh}")
+  private String refreshPath;
+
   private static final List<String> PUBLIC_PATH_PREFIXES = List.of(
       "/swagger-ui",
       "/swagger-ui.html",
@@ -96,7 +99,9 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
   }
 
   private boolean shouldSkipAuth(String requestPath) {
-    if (loginPath.equals(requestPath) || registerPath.equals(requestPath)) {
+    if (loginPath.equals(requestPath)
+        || registerPath.equals(requestPath)
+        || refreshPath.equals(requestPath)) {
       return true;
     }
     return PUBLIC_PATH_PREFIXES.stream().anyMatch(requestPath::startsWith);
