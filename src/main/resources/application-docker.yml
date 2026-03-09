@@ -3,34 +3,36 @@ spring:
     name: apigateway
   cloud:
     gateway:
-      routes:
-        - id: authservice
-          uri: ${services.authservice-url}
-          predicates:
-            - Path=/api/v1/auth/**
-          filters:
-            - name: CircuitBreaker
-              args:
-                name: authservice
-                fallbackUri: forward:/fallback
-        - id: userservice
-          uri: ${services.userservice-url}
-          predicates:
-            - Path=/api/users/**,/api/cards/**
-          filters:
-            - name: CircuitBreaker
-              args:
-                name: userservice
-                fallbackUri: forward:/fallback
-        - id: orderservice
-          uri: ${services.orderservice-url}
-          predicates:
-            - Path=/api/v1/orders/**,/api/v1/items/**
-          filters:
-            - name: CircuitBreaker
-              args:
-                name: orderservice
-                fallbackUri: forward:/fallback
+      server:
+        webflux:
+          routes:
+            - id: authservice
+              uri: ${services.authservice-url}
+              predicates:
+                - Path=/api/v1/auth/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: authservice
+                    fallbackUri: forward:/fallback
+            - id: userservice
+              uri: ${services.userservice-url}
+              predicates:
+                - Path=/api/users/**,/api/cards/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: userservice
+                    fallbackUri: forward:/fallback
+            - id: orderservice
+              uri: ${services.orderservice-url}
+              predicates:
+                - Path=/api/v1/orders/**,/api/v1/items/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: orderservice
+                    fallbackUri: forward:/fallback
 
 services:
   authservice-url: http://authservice:8082

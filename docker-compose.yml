@@ -14,10 +14,10 @@ services:
       - app-network
 
   authservice:
-    build: ../authservice
+    build: ../innowise-authService
     container_name: authservice
     env_file:
-      - ../authservice/.env
+      - ../innowise-authService/.env
     environment:
       DB_HOST_DOCKER: authservice-postgres
       DB_PORT: ${AUTH_DB_PORT}
@@ -25,7 +25,7 @@ services:
       DB_USERNAME: ${AUTH_DB_USERNAME}
       DB_PASSWORD: ${AUTH_DB_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
-      AUTHSERVICE_INTERNAL_ENDPOINT_SECRET: ${AUTHSERVICE_INTERNAL_ENDPOINT_SECRET}
+      SERVICES_INTERNAL_SECRET: ${SERVICES_INTERNAL_SECRET}
       SPRING_PROFILES_ACTIVE: docker
       LOGGING_LEVEL_LIQUIBASE: INFO
       LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_BOOT_AUTOCONFIGURE_LIQUIBASE: DEBUG
@@ -58,10 +58,10 @@ services:
       - app-network
 
   userservice:
-    build: ../userservice
+    build: ../innowise-userService
     container_name: userservice
     env_file:
-      - ../userservice/.env
+      - ../innowise-userService/.env
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
       SPRING_DATASOURCE_URL: ${USER_SPRING_DATASOURCE_URL}
@@ -70,8 +70,8 @@ services:
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: ${USER_SPRING_DATASOURCE_DRIVER_CLASS_NAME}
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
-      JWT_SECRET: ${JWT_SECRET}
-      USERSERVICE_INTERNAL_ENDPOINT_SECRET: ${USERSERVICE_INTERNAL_ENDPOINT_SECRET}
+      SERVICES_INTERNAL_SECRET: ${SERVICES_INTERNAL_SECRET}
+      GATEWAY_INTERNAL_SIGNING_SECRET: ${GATEWAY_INTERNAL_SIGNING_SECRET}
     ports:
       - "8081:8080"
     depends_on:
@@ -115,10 +115,10 @@ services:
       - app-network
 
   orderservice:
-    build: ../orderservice
+    build: ../innowise-orderService
     container_name: orderservice
     env_file:
-      - ../orderservice/.env
+      - ../innowise-orderService/.env
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://orderservice-postgres:5432/${ORDER_DB_NAME}
       SPRING_DATASOURCE_USERNAME: ${ORDER_DB_USERNAME}
@@ -126,7 +126,6 @@ services:
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: ${ORDER_SPRING_DATASOURCE_DRIVER_CLASS_NAME}
       SPRING_PROFILES_ACTIVE: docker
       JWT_SECRET: ${JWT_SECRET}
-      ORDERSERVICE_INTERNAL_SIGNING_SECRET: ${ORDERSERVICE_INTERNAL_SIGNING_SECRET}
       USERSERVICE_BASE_URL: http://userservice:8080
       AUTHSERVICE_BASE_URL: http://authservice:8082
     ports:

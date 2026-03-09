@@ -51,6 +51,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
   private static final List<String> PUBLIC_PATH_PREFIXES = List.of(
       "/swagger-ui",
+      "/swagger-ui.html",
       "/v3/api-docs",
       "/actuator/health"
   );
