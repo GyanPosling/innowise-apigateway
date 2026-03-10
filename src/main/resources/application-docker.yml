@@ -1,0 +1,67 @@
+spring:
+  application:
+    name: apigateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: authservice
+              uri: ${services.authservice-url}
+              predicates:
+                - Path=/api/v1/auth/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: authservice
+                    fallbackUri: forward:/fallback
+            - id: adminservice
+              uri: ${services.authservice-url}
+              predicates:
+                - Path=/api/v1/admin/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: adminservice
+                    fallbackUri: forward:/fallback
+            - id: userservice
+              uri: ${services.userservice-url}
+              predicates:
+                - Path=/api/users/**,/api/cards/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: userservice
+                    fallbackUri: forward:/fallback
+            - id: orderservice
+              uri: ${services.orderservice-url}
+              predicates:
+                - Path=/api/v1/orders/**,/api/v1/items/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: orderservice
+                    fallbackUri: forward:/fallback
+
+services:
+  authservice-url: http://authservice:8082
+  userservice-url: http://userservice:8080
+  orderservice-url: http://orderservice:8080
+
+jwt:
+  secret: ${JWT_SECRET}
+
+gateway:
+  internal-signing-secret: ${GATEWAY_INTERNAL_SIGNING_SECRET}
+
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
+
+security:
+  auth:
+    login-path: /api/v1/auth/login
+    register-path: /api/v1/auth/register
+    refresh-path: /api/v1/auth/refresh
+
+server:
+  port: 8085

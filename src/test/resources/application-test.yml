@@ -1,0 +1,5 @@
+jwt:
+  secret: test-jwt-secret-test-jwt-secret-test-jwt-secret
+
+gateway:
+  internal-signing-secret: test-internal-signing-secret
