@@ -42,11 +42,21 @@ spring:
                   args:
                     name: orderservice
                     fallbackUri: forward:/fallback
+            - id: paymentservice
+              uri: ${services.paymentservice-url:http://paymentservice:8080}
+              predicates:
+                - Path=/api/v1/payments/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: paymentservice
+                    fallbackUri: forward:/fallback
 
 services:
   authservice-url: ${AUTHSERVICE_BASE_URL:http://authservice:8082}
   userservice-url: ${USERSERVICE_BASE_URL:http://userservice:8080}
   orderservice-url: ${ORDERSERVICE_BASE_URL:http://orderservice:8080}
+  paymentservice-url: ${PAYMENTSERVICE_BASE_URL:http://paymentservice:8080}
 
 jwt:
   secret: ${JWT_SECRET}
