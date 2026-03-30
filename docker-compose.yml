@@ -149,6 +149,57 @@ services:
     networks:
       - app-network
 
+  paymentservice:
+    build: ../innowise-paymentservice
+    container_name: paymentservice
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATA_MONGODB_URI: mongodb://paymentservice-mongodb:27017/paymentservice
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      JWT_SECRET: ${JWT_SECRET}
+      GATEWAY_INTERNAL_SIGNING_SECRET: ${GATEWAY_INTERNAL_SIGNING_SECRET}
+      ORDERSERVICE_BASE_URL: http://orderservice:8080
+      PAYMENT_CREATED_TOPIC: ${PAYMENT_CREATED_TOPIC:-create-payment}
+      RANDOM_API_URL: ${RANDOM_API_URL:-https://www.randomnumberapi.com/api/v1.0/random}
+    depends_on:
+      paymentservice-mongodb:
+        condition: service_started
+      kafka:
+        condition: service_started
+    networks:
+      - app-network
+
+  paymentservice-mongodb:
+    image: mongo:7.0
+    container_name: paymentservice-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - paymentservice_mongodb_data:/data/db
+    networks:
+      - app-network
+
+  kafka:
+    image: bitnami/kafka:3.7
+    container_name: app-kafka
+    environment:
+      KAFKA_CFG_NODE_ID: 1
+      KAFKA_CFG_PROCESS_ROLES: broker,controller
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_KRAFT_CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+    ports:
+      - "9092:9092"
+    networks:
+      - app-network
+
 volumes:
   authservice_pgdata:
   userservice_pgdata:
