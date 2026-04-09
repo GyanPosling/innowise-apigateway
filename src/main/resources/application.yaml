@@ -42,11 +42,45 @@ spring:
                   args:
                     name: orderservice
                     fallbackUri: forward:/fallback
+            - id: paymentservice
+              uri: ${services.paymentservice-url:http://paymentservice:8080}
+              predicates:
+                - Path=/api/v1/payments/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: paymentservice
+                    fallbackUri: forward:/fallback
+            - id: authservice-api-docs
+              uri: ${services.authservice-url:http://authservice:8082}
+              predicates:
+                - Path=/docs/authservice/v3/api-docs
+              filters:
+                - SetPath=/v3/api-docs
+            - id: userservice-api-docs
+              uri: ${services.userservice-url:http://userservice:8080}
+              predicates:
+                - Path=/docs/userservice/v3/api-docs
+              filters:
+                - SetPath=/v3/api-docs
+            - id: orderservice-api-docs
+              uri: ${services.orderservice-url:http://orderservice:8080}
+              predicates:
+                - Path=/docs/orderservice/v3/api-docs
+              filters:
+                - SetPath=/v3/api-docs
+            - id: paymentservice-api-docs
+              uri: ${services.paymentservice-url:http://paymentservice:8080}
+              predicates:
+                - Path=/docs/paymentservice/v3/api-docs
+              filters:
+                - SetPath=/v3/api-docs
 
 services:
   authservice-url: ${AUTHSERVICE_BASE_URL:http://authservice:8082}
   userservice-url: ${USERSERVICE_BASE_URL:http://userservice:8080}
   orderservice-url: ${ORDERSERVICE_BASE_URL:http://orderservice:8080}
+  paymentservice-url: ${PAYMENTSERVICE_BASE_URL:http://paymentservice:8080}
 
 jwt:
   secret: ${JWT_SECRET}
@@ -63,5 +97,35 @@ security:
     register-path: /api/v1/auth/register
     refresh-path: /api/v1/auth/refresh
 
+springdoc:
+  swagger-ui:
+    disable-swagger-default-url: true
+    urls-primary-name: Auth Service
+    urls:
+      - name: Auth Service
+        url: /docs/authservice/v3/api-docs
+      - name: User Service
+        url: /docs/userservice/v3/api-docs
+      - name: Order Service
+        url: /docs/orderservice/v3/api-docs
+      - name: Payment Service
+        url: /docs/paymentservice/v3/api-docs
+
 server:
   port: ${SERVER_PORT:8085}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true

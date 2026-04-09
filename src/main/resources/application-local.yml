@@ -51,6 +51,30 @@ spring:
                   args:
                     name: paymentservice
                     fallbackUri: forward:/fallback
+            - id: authservice-api-docs
+              uri: ${services.authservice-url}
+              predicates:
+                - Path=/docs/authservice/v3/api-docs
+              filters:
+                - SetPath=/v3/api-docs
+            - id: userservice-api-docs
+              uri: ${services.userservice-url}
+              predicates:
+                - Path=/docs/userservice/v3/api-docs
+              filters:
+                - SetPath=/v3/api-docs
+            - id: orderservice-api-docs
+              uri: ${services.orderservice-url}
+              predicates:
+                - Path=/docs/orderservice/v3/api-docs
+              filters:
+                - SetPath=/v3/api-docs
+            - id: paymentservice-api-docs
+              uri: ${services.paymentservice-url}
+              predicates:
+                - Path=/docs/paymentservice/v3/api-docs
+              filters:
+                - SetPath=/v3/api-docs
 
 services:
   authservice-url: http://localhost:8082
@@ -72,6 +96,20 @@ security:
     login-path: /api/v1/auth/login
     register-path: /api/v1/auth/register
     refresh-path: /api/v1/auth/refresh
+
+springdoc:
+  swagger-ui:
+    disable-swagger-default-url: true
+    urls-primary-name: Auth Service
+    urls:
+      - name: Auth Service
+        url: /docs/authservice/v3/api-docs
+      - name: User Service
+        url: /docs/userservice/v3/api-docs
+      - name: Order Service
+        url: /docs/orderservice/v3/api-docs
+      - name: Payment Service
+        url: /docs/paymentservice/v3/api-docs
 
 server:
   port: 8085
